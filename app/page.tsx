@@ -20,7 +20,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-4">
               <Link
-                href="/signin"
+                href="/sign-in"
                 className="text-gray-600 hover:text-gray-900 transition"
               >
                 Sign In
