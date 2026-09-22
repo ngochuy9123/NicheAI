@@ -34,6 +34,11 @@ export default function DashboardLayout({
     return null;
   }
 
+  const handleSignOut = async () => {
+    console.log("Signing out...");
+    await signOut({ redirect: true, callbackUrl: "/sign-in" });
+  };
+
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Validate", href: "/dashboard/validate", icon: Sparkle },
@@ -89,6 +94,7 @@ export default function DashboardLayout({
               <button
                 className="ml-2 p-2 rounded-lg hover:bg-gray-100 transition"
                 title="Sign out"
+                onClick={handleSignOut}
               >
                 <LogOut className="h-5 w-5 text-gray-600" />
               </button>
@@ -134,7 +140,10 @@ export default function DashboardLayout({
                 </Link>
               ))}
 
-              <button className="w-full group flex items-center px-3 py-2 text-base font-medium rounded-lg hover:bg-gray-100 text-red-600">
+              <button
+                className="w-full group flex items-center px-3 py-2 text-base font-medium rounded-lg hover:bg-gray-100 text-red-600"
+                onClick={handleSignOut}
+              >
                 <LogOut className="mr-4 h-6 w-6" />
                 Sign out
               </button>
