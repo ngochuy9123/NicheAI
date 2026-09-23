@@ -64,7 +64,7 @@ export default function AdminLoginPage() {
           </p>
           <div className="mt-4 text-center">
             <Link
-              href="/auth/signin"
+              href="/sign-in"
               className="text-sm text-blue-600 hover:text-blue-500"
             >
               Regular user? Sign in here

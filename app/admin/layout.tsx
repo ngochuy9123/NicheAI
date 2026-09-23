@@ -41,6 +41,10 @@ export default function AdminLayout({
     return null;
   }
 
+  const handleSignOut = () => {
+    signOut({ redirect: true, callbackUrl: "/admin-login" });
+  };
+
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     {
@@ -108,6 +112,7 @@ export default function AdminLayout({
               </div>
               <button
                 className="ml-2 p-2 rounded-lg hover:bg-gray-100 transition"
+                onClick={handleSignOut}
                 title="Sign out"
               >
                 <LogOut className="h-5 w-5 text-gray-600" />
@@ -169,7 +174,10 @@ export default function AdminLayout({
                 <LayoutDashboard className="mr-4 h-6 w-6 text-gray-600" />
                 User Dashboard
               </Link>
-              <button className="w-full group flex items-center px-3 py-2 text-base font-medium rounded-lg hover:bg-gray-100 text-red-600">
+              <button
+                className="w-full group flex items-center px-3 py-2 text-base font-medium rounded-lg hover:bg-gray-100 text-red-600"
+                onClick={handleSignOut}
+              >
                 <LogOut className="mr-4 h-6 w-6" />
                 Sign out
               </button>
@@ -180,7 +188,7 @@ export default function AdminLayout({
 
       {/* Main content */}
       <div className="lg:pl-64">
-        <main className="py-6 px-4 sm:px-6 lg:px-8">children</main>
+        <main className="py-6 px-4 sm:px-6 lg:px-8">{children}</main>
       </div>
     </div>
   );
