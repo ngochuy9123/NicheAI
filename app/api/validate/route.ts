@@ -31,5 +31,66 @@ export async function POST(req: NextRequest) {
     const isPro = user.subscription.planType === PlanType.PRO;
 
     // Check usage limits for Free users
-  } catch (error) {}
+
+    if (!isPro) {
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+
+      const usage = await prisma.usageLog.findUnique({
+        where: {
+          userId_month_year: {
+            userId: userID,
+            month: currentMonth,
+            year: currentYear,
+          },
+        },
+      });
+
+      const validationCount = usage?.validationCount || 0;
+      const freeLimit = 3;
+      if (validationCount >= freeLimit) {
+        return NextResponse.json(
+          {
+            error:
+              "Monthly validation limit reached. Upgrade to pro for unlimited validations",
+            limit: freeLimit,
+            used: validationCount,
+          },
+          { status: 429 },
+        );
+      }
+    }
+
+    //Parse request body data
+    const body = await req.json();
+    const { niche, keyword } = body;
+
+    if (!niche || !keyword) {
+      return NextResponse.json(
+        { error: "Niche and keyword are required" },
+        { status: 400 },
+      );
+    }
+    // Create report in pending status
+    const report = await prisma.report.create({
+      data: {
+        userId: userID,
+        niche,
+        keyword,
+        status: ReportStatus.PENDING,
+      },
+    });
+
+    // Process asynchronously
+    return NextResponse.json(
+      {
+        message: "Validation Started",
+        reportId: report.id,
+        status: "pending",
+      },
+      { status: 202 },
+    );
+  } catch (error) {
+    console.error("Validation api error", error);
+  }
 }
