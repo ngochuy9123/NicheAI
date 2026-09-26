@@ -94,3 +94,40 @@ export async function POST(req: NextRequest) {
     console.error("Validation api error", error);
   }
 }
+
+async function processValidation(
+  reportID: string,
+  niche: string,
+  keyword: string,
+  isPro: boolean,
+) {
+  try {
+    await prisma.report.update({
+      where: { id: reportID },
+      data: { status: ReportStatus.PROCESSING },
+    });
+    const trendsService = new GoogleTrendsService();
+    const openaiService = new OpenAIService();
+
+    // Collect data from google trends
+    console.log(`[Report {report} ] Starting google trends analysis...`);
+    const trendsData = await trendsService.analyzeKeyword(keyword, isPro);
+
+    console.log(`[Report {reportId}] Generation AI insights`);
+    const aiInsights = await openaiService.generateMarketInsights(
+      niche,
+      keyword,
+      trendsData,
+      isPro,
+    );
+
+    // Calculate overall score and viability
+    const overallScore = aiInsights.opportunityAssessment.score;
+    let viabilityRating: string;
+    if (overallScore >= 70) viabilityRating = "HIGH";
+    else if (overallScore >= 40) viabilityRating = "MEDIUM";
+    else viabilityRating = "LOW";
+
+    // Update report with results
+  } catch (error) {}
+}
