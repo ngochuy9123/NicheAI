@@ -82,6 +82,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Process asynchronously
+    processValidation(report.id, niche, keyword, isPro);
+
     return NextResponse.json(
       {
         message: "Validation Started",
@@ -129,5 +131,65 @@ async function processValidation(
     else viabilityRating = "LOW";
 
     // Update report with results
-  } catch (error) {}
+    await prisma.report.update({
+      where: { id: reportID },
+      data: {
+        status: ReportStatus.COMPLETED,
+        trendsData: trendsData as any,
+        aiInsights: aiInsights as any,
+        competitionData: {
+          level: aiInsights.competitionAnalysis.level,
+          keyPlayers: aiInsights.competitionAnalysis.keyPlayers,
+        } as any,
+        monetizationIdeas: {
+          primary: aiInsights.monetizationStrategies.primary,
+          secondary: aiInsights.monetizationStrategies.secondary,
+        } as any,
+        gtmStrategy: aiInsights.gtmStrategy as any,
+        overallScore,
+        viabilityRating,
+        summaryText: aiInsights.summary,
+      },
+    });
+
+    // Update Usage Log Data
+    const report = await prisma.report.findUnique({
+      where: { id: reportID },
+      select: { userId: true },
+    });
+
+    if (report) {
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+
+      await prisma.usageLog.upsert({
+        where: {
+          userId_month_year: {
+            userId: report.userId,
+            month: currentMonth,
+            year: currentYear,
+          },
+        },
+        create: {
+          userId: report.userId,
+          month: currentMonth,
+          year: currentYear,
+          validationCount: 1,
+        },
+        update: {
+          validationCount: { increment: 1 },
+        },
+      });
+    }
+    console.log(`[Report ${reportID}] validation completed successfully`);
+  } catch (error) {
+    console.error(`[Report ${reportID} ] validation failed`, error);
+    await prisma.report.update({
+      where: { id: reportID },
+      data: {
+        status: ReportStatus.FAILED,
+        summaryText: "Validation Fail. Pls try again!",
+      },
+    });
+  }
 }
