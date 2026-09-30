@@ -58,7 +58,7 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchReports();
     fetchUsage();
-    // fetchPaymentRequests();
+    fetchPaymentRequests();
   }, []);
 
   const fetchPaymentRequests = async () => {
@@ -190,28 +190,31 @@ export default function DashboardPage() {
 
       {/* Pending Payment Notice */}
 
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg">
-        <div className="px-6 py-4">
-          <div className="flex items-start gap-3">
-            <Clock className="w-6 h-6 text-yellow-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="font-semibold text-yellow-900">
-                Payment Request Pending
-              </h3>
-              <p className="text-sm text-yellow-800 mt-1">
-                Your payment request is awaiting admin approval. You will be
-                automatically upgraded to Pro once your payment is approved.
-              </p>
-              <Link
-                href="/dashboard/settings"
-                className="text-sm text-yellow-700 underline mt-2 inline-block"
-              >
-                View payment status →
-              </Link>
+      {!usage?.isPro && paymentRequests.some((r) => r.status === "PENDING") && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="px-6 py-4">
+            <div className="flex items-start gap-3">
+              <Clock className="w-6 h-6 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-yellow-900">
+                  Payment Request Pending
+                </h3>
+                <p className="text-sm text-yellow-800 mt-1">
+                  Your payment request is awaiting admin approval. You&apos;ll
+                  be automatically upgraded to Pro once your payment is
+                  approved.
+                </p>
+                <Link
+                  href="/dashboard/settings"
+                  className="text-sm text-yellow-700 underline mt-2 inline-block"
+                >
+                  View payment status →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Subscription Status Card */}
       {usage && (
@@ -454,7 +457,7 @@ export default function DashboardPage() {
               {reports.map((report) => (
                 <Link
                   key={report.id}
-                  href={`/dashboard/reports/id`}
+                  href={`/dashboard/reports/${report.id}`}
                   className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition"
                 >
                   <div className="flex items-start justify-between">

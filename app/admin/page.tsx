@@ -1,17 +1,94 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
-  Activity,
-  CheckCircle,
-  DollarSign,
+  Users,
   FileText,
   TrendingUp,
-  Users,
+  DollarSign,
+  Activity,
+  CheckCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+
+interface Analytics {
+  totalUsers: number;
+  planBreakdown: {
+    FREE: number;
+    PRO: number;
+  };
+  totalReports: number;
+  reportsBreakdown: {
+    COMPLETED: number;
+    PROCESSING: number;
+    PENDING: number;
+    FAILED: number;
+  };
+  monthlyValidations: number;
+  newUsersThisMonth: number;
+  recentReports: number;
+  averageScore: number;
+  totalMRR: number;
+}
 
 export default function AdminDashboardPage() {
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await axios.get("/api/admin/analytics");
+      setAnalytics(response.data);
+      //console.log("total data",response.data);
+    } catch (error) {
+      console.error("Error fetching analytics", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg border border-gray-200 shadow-sm"
+            >
+              <div className="py-6 px-6">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div className="py-12 px-6 text-center">
+            <p className="text-gray-600">Failed to load analytics</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -28,9 +105,9 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-blue-600" />
           </div>
           <div className="px-6 pb-4">
-            <div className="text-2xl font-bold">totalUsers</div>
+            <div className="text-2xl font-bold">{analytics.totalUsers}</div>
             <p className="text-xs text-gray-500 mt-1">
-              +newUsersThisMonth this month
+              +{analytics.newUsersThisMonth} this month
             </p>
           </div>
         </div>
@@ -41,9 +118,9 @@ export default function AdminDashboardPage() {
             <FileText className="h-4 w-4 text-green-600" />
           </div>
           <div className="px-6 pb-4">
-            <div className="text-2xl font-bold">totalReports</div>
+            <div className="text-2xl font-bold">{analytics.totalReports}</div>
             <p className="text-xs text-gray-500 mt-1">
-              recentReportsin last 7 days
+              {analytics.recentReports} last 7 days
             </p>
           </div>
         </div>
@@ -54,8 +131,12 @@ export default function AdminDashboardPage() {
             <TrendingUp className="h-4 w-4 text-purple-600" />
           </div>
           <div className="px-6 pb-4">
-            <div className="text-2xl font-bold">PRO</div>
-            <p className="text-xs text-gray-500 mt-1">FREE free users</p>
+            <div className="text-2xl font-bold">
+              {analytics.planBreakdown.PRO}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {analytics.planBreakdown.FREE} free users
+            </p>
           </div>
         </div>
 
@@ -65,7 +146,7 @@ export default function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-green-600" />
           </div>
           <div className="px-6 pb-4">
-            <div className="text-2xl font-bold">$4</div>
+            <div className="text-2xl font-bold">${analytics.totalMRR}</div>
             <p className="text-xs text-gray-500 mt-1">
               Monthly recurring revenue
             </p>
@@ -92,7 +173,7 @@ export default function AdminDashboardPage() {
                   <span className="text-sm font-medium">Completed</span>
                 </div>
                 <div className="text-2xl font-bold text-green-600">
-                  COMPLETED
+                  {analytics.reportsBreakdown.COMPLETED}
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -101,7 +182,7 @@ export default function AdminDashboardPage() {
                   <span className="text-sm font-medium">Processing</span>
                 </div>
                 <div className="text-2xl font-bold text-blue-600">
-                  PROCESSING
+                  {analytics.reportsBreakdown.PROCESSING}
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -110,7 +191,7 @@ export default function AdminDashboardPage() {
                   <span className="text-sm font-medium">Pending</span>
                 </div>
                 <div className="text-2xl font-bold text-yellow-600">
-                  PENDING
+                  {analytics.reportsBreakdown.PENDING}
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -118,7 +199,9 @@ export default function AdminDashboardPage() {
                   <Activity className="w-5 h-5 text-red-600" />
                   <span className="text-sm font-medium">Failed</span>
                 </div>
-                <div className="text-2xl font-bold text-red-600">FAILED</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {analytics.reportsBreakdown.FAILED}
+                </div>
               </div>
             </div>
           </div>
@@ -140,10 +223,17 @@ export default function AdminDashboardPage() {
                   <span className="text-sm text-gray-600">
                     Monthly Validations
                   </span>
-                  <span className="text-lg font-bold">monthlyValidations</span>
+                  <span className="text-lg font-bold">
+                    {analytics.monthlyValidations}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" />
+                  <div
+                    className="bg-blue-600 h-2 rounded-full"
+                    style={{
+                      width: `${Math.min((analytics.monthlyValidations / 100) * 100, 100)}%`,
+                    }}
+                  />
                 </div>
               </div>
 
@@ -152,10 +242,15 @@ export default function AdminDashboardPage() {
                   <span className="text-sm text-gray-600">
                     Average Report Score
                   </span>
-                  <span className="text-lg font-bold">10/100</span>
+                  <span className="text-lg font-bold">
+                    {analytics.averageScore}/100
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" />
+                  <div
+                    className="bg-green-600 h-2 rounded-full"
+                    style={{ width: `${analytics.averageScore}%` }}
+                  />
                 </div>
               </div>
 
@@ -164,17 +259,43 @@ export default function AdminDashboardPage() {
                   <span className="text-sm text-gray-600">
                     Pro Conversion Rate
                   </span>
-                  <span className="text-lg font-bold">4 %</span>
+                  <span className="text-lg font-bold">
+                    {analytics.totalUsers > 0
+                      ? Math.round(
+                          (analytics.planBreakdown.PRO / analytics.totalUsers) *
+                            100,
+                        )
+                      : 0}
+                    %
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-purple-600 h-2 rounded-full" />
+                  <div
+                    className="bg-purple-600 h-2 rounded-full"
+                    style={{
+                      width: `${
+                        analytics.totalUsers > 0
+                          ? (analytics.planBreakdown.PRO /
+                              analytics.totalUsers) *
+                            100
+                          : 0
+                      }%`,
+                    }}
+                  />
                 </div>
               </div>
 
               <div className="pt-4 border-t border-gray-200">
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Success Rate:</span> % of
-                  reports completed successfully
+                  <span className="font-semibold">Success Rate:</span>{" "}
+                  {analytics.totalReports > 0
+                    ? Math.round(
+                        (analytics.reportsBreakdown.COMPLETED /
+                          analytics.totalReports) *
+                          100,
+                      )
+                    : 0}
+                  % of reports completed successfully
                 </p>
               </div>
             </div>

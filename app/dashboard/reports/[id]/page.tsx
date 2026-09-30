@@ -106,7 +106,7 @@ export default function ReportDetailPage() {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <p>The report you are looking for doesn&apost exits</p>
+          <p>The report you are looking for doesn&apos;t exits</p>
         </div>
       </div>
     );
