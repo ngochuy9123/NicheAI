@@ -41,7 +41,6 @@ export default function DashboardLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Validate", href: "/dashboard/validate", icon: Sparkle },
     { name: "Reports", href: "/dashboard/reports", icon: FileText },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];

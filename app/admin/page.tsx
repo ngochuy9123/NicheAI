@@ -35,10 +35,6 @@ export default function AdminDashboardPage() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
   const fetchAnalytics = async () => {
     try {
       const response = await axios.get("/api/admin/analytics");
@@ -50,6 +46,10 @@ export default function AdminDashboardPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
   if (isLoading) {
     return (
